@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive Project Pricer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+      body {
+        background-color: #111;
+      }
+      #background-blur {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('https://images.unsplash.com/photo-1597773150796-e5c14ebecbf5?q=80&w=2070&auto=format&fit=crop');
+        background-size: cover;
+        background-position: center;
+        filter: blur(50px) saturate(1.2);
+        opacity: 0.5;
+        z-index: -1;
+      }
+      /* Custom scrollbar for a better look */
+      ::-webkit-scrollbar {
+          width: 8px;
+          height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb {
+          background: rgba(255, 255, 255, 0.2);
+          border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+          background: rgba(255, 255, 255, 0.3);
+      }
+      
+      /* Presentation Mode for PNG/PDF Export */
+      .presentation-mode .presentation-hide {
+        display: none !important;
+      }
+      .presentation-mode [title="Drag horizontally to change duration"] {
+        cursor: default !important;
+      }
+      .presentation-mode [title="Drag horizontally to change duration"]:hover {
+        transform: none !important;
+        color: inherit !important;
+      }
+      .presentation-mode .rounded-2xl.flex.items-center:hover { /* Task item selector from TimelineGrid.tsx */
+        transform: scale(1) !important;
+        box-shadow: none !important;
+      }
+      .presentation-mode .task-item-inner-wrapper {
+        overflow: visible !important;
+        height: auto !important;
+      }
+      .presentation-mode .task-item {
+        height: auto !important;
+        min-height: 40px; 
+      }
+      .presentation-mode .editable-text {
+        white-space: normal !important;
+        overflow-wrap: break-word !important;
+        height: auto !important;
+      }
+    </style>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              mono: ['Space Mono', 'monospace'],
+            },
+            colors: {
+              'glass-bg': 'rgba(30, 30, 30, 0.5)',
+              'glass-border': 'rgba(255, 255, 255, 0.1)',
+              'text-primary': '#EAEAEA',
+              'text-secondary': '#A0A0A0',
+              'accent': '#F0F0F0',
+              'accent-text': '#111111',
+              'highlight': '#38BDF8',
+            },
+            animation: {
+              'fade-in': 'fade-in 0.1s ease-out forwards',
+              'spin': 'spin 1s linear infinite',
+            },
+            keyframes: {
+              'fade-in': {
+                '0%': { opacity: '0', transform: 'scale(0.95)' },
+                '100%': { opacity: '1', transform: 'scale(1)' },
+              },
+              'spin': {
+                'from': { transform: 'rotate(0deg)' },
+                'to': { transform: 'rotate(360deg)' },
+              },
+            },
+          },
+        },
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.1.1",
+    "react-dom": "https://aistudiocdn.com/react-dom@^19.1.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
+    "react/": "https://aistudiocdn.com/react@^19.1.1/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.21.0"
+  }
+}
+</script>
+</head>
+  <body class="text-text-primary">
+    <div id="background-blur"></div>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

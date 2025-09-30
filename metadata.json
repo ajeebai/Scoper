@@ -1,0 +1,5 @@
+{
+  "name": "Scoper Fullscreen",
+  "description": "An interactive project timeline and pricing calculator, allowing users to select different project scopes and see the corresponding tasks, timeline, and cost breakdown in a clear, grid-based interface.",
+  "requestFramePermissions": []
+}
