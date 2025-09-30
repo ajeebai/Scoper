@@ -13,8 +13,6 @@ interface ToolbarProps {
   onSnapToGridChange: (enabled: boolean) => void;
   currentThemeId: string;
   onThemeChange: (themeId: string) => void;
-  hasCustomBackground: boolean;
-  onClearBackground: () => void;
 }
 
 const CURRENCY_SYMBOLS: { [key in Currency]: string } = {
@@ -49,14 +47,6 @@ const LineIcon: React.FC<{ className?: string }> = ({ className }) => (
         <path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/>
     </svg>
 );
-const ResetIcon: React.FC<{className?: string}> = ({className}) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-        <path d="M3 2v6h6" />
-        <path d="M21 12A9 9 0 0 0 6 5.3L3 8" />
-        <path d="M21 22v-6h-6" />
-        <path d="M3 12a9 9 0 0 0 15 6.7l3-2.7" />
-    </svg>
-);
 
 
 export const Toolbar: React.FC<ToolbarProps> = ({
@@ -64,7 +54,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     showPricePerDay, onShowPricePerDayChange,
     isSnapToGridEnabled, onSnapToGridChange,
     currentThemeId, onThemeChange,
-    hasCustomBackground, onClearBackground,
 }) => {
     const [isCurrencyDropdownOpen, setIsCurrencyDropdownOpen] = useState(false);
     const currencyDropdownRef = useRef<HTMLDivElement>(null);
@@ -86,16 +75,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
         <div id="app-toolbar" className="presentation-hide fixed top-6 right-6 sm:top-8 sm:right-8 z-50">
             <div className="flex items-center gap-2 bg-glass-bg/80 backdrop-blur-md border border-glass-border rounded-full p-1.5">
                 <ThemeSwitcher themes={themes} currentThemeId={currentThemeId} onThemeChange={onThemeChange} />
-
-                {hasCustomBackground && (
-                    <button
-                        onClick={onClearBackground}
-                        className="w-10 h-10 flex items-center justify-center rounded-full text-text-secondary hover:bg-subtle-hover hover:text-text-primary transition-colors"
-                        aria-label="Reset background image"
-                    >
-                        <ResetIcon className="w-5 h-5" />
-                    </button>
-                )}
 
                 <div className="w-px h-6 bg-glass-border mx-1"></div>
 

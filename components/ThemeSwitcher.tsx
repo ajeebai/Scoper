@@ -18,19 +18,6 @@ const PaletteIcon: React.FC<{className?: string}> = ({className}) => (
     </svg>
 );
 
-const ThemePreview: React.FC<{ theme: Theme }> = ({ theme }) => (
-    <div 
-        className="w-10 h-6 rounded-md flex items-center justify-center overflow-hidden border border-white/10"
-        style={{ backgroundColor: theme.previewColors.bg }}
-    >
-        <div className="flex items-center gap-0.5">
-            <div className="w-2 h-4 rounded-sm" style={{ backgroundColor: theme.previewColors.highlight }}></div>
-            <div className="w-3 h-4 rounded-sm" style={{ backgroundColor: theme.previewColors.accent }}></div>
-        </div>
-    </div>
-);
-
-
 export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ themes, currentThemeId, onThemeChange }) => {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -68,7 +55,11 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ themes, currentThe
                             className={`w-full h-10 px-3 flex items-center justify-between rounded-xl text-sm transition-colors ${currentThemeId === theme.id ? 'bg-accent text-accent-text' : 'text-text-primary hover:bg-subtle-hover'}`}
                         >
                             <span>{theme.name}</span>
-                            <ThemePreview theme={theme} />
+                            <div className="flex items-center gap-1">
+                                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: theme.previewColors.bg }}></div>
+                                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: theme.previewColors.accent }}></div>
+                                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: theme.previewColors.highlight }}></div>
+                            </div>
                         </button>
                     ))}
                 </div>

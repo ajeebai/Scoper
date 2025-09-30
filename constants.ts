@@ -8,20 +8,20 @@ export const DEFAULT_CATEGORIES: Category[] = [
 ];
 
 export const DEFAULT_CATEGORY_STYLES: { [key: string]: CategoryStyle } = {
-  STRATEGY:    { container: 'bg-sky-500/20 border border-sky-400/30',      text: 'font-sans text-xs text-sky-200' },
-  DESIGN:      { container: 'bg-fuchsia-500/20 border border-fuchsia-400/30', text: 'font-sans text-xs text-fuchsia-200' },
-  DEVELOPMENT: { container: 'bg-emerald-500/20 border border-emerald-400/30', text: 'font-sans text-xs text-emerald-200' },
-  CONTENT:     { container: 'bg-amber-500/20 border border-amber-400/30',   text: 'font-sans text-xs text-amber-200' },
-  DEFAULT:     { container: 'bg-gray-500/20 border border-gray-400/30',   text: 'font-sans text-xs text-gray-200' },
+  STRATEGY:    { container: 'bg-sky-500/20 border border-sky-400/30',      text: 'font-sans text-xs text-[var(--color-text-strategy)]' },
+  DESIGN:      { container: 'bg-fuchsia-500/20 border border-fuchsia-400/30', text: 'font-sans text-xs text-[var(--color-text-design)]' },
+  DEVELOPMENT: { container: 'bg-emerald-500/20 border border-emerald-400/30', text: 'font-sans text-xs text-[var(--color-text-development)]' },
+  CONTENT:     { container: 'bg-amber-500/20 border border-amber-400/30',   text: 'font-sans text-xs text-[var(--color-text-content)]' },
+  DEFAULT:     { container: 'bg-gray-500/20 border border-gray-400/30',   text: 'font-sans text-xs text-[var(--color-text-default)]' },
 };
 
 export const THEME_COLORS: CategoryStyle[] = [
-  { container: 'bg-rose-500/20 border border-rose-400/30',      text: 'font-sans text-xs text-rose-200' },
-  { container: 'bg-teal-500/20 border border-teal-400/30',      text: 'font-sans text-xs text-teal-200' },
-  { container: 'bg-orange-500/20 border border-orange-400/30',    text: 'font-sans text-xs text-orange-200' },
-  { container: 'bg-indigo-500/20 border border-indigo-400/30',  text: 'font-sans text-xs text-indigo-200' },
-  { container: 'bg-lime-500/20 border border-lime-400/30',      text: 'font-sans text-xs text-lime-200' },
-  { container: 'bg-violet-500/20 border border-violet-400/30',text: 'font-sans text-xs text-violet-200' },
+  { container: 'bg-rose-500/20 border border-rose-400/30',      text: 'font-sans text-xs text-[var(--color-text-rose)]' },
+  { container: 'bg-teal-500/20 border border-teal-400/30',      text: 'font-sans text-xs text-[var(--color-text-teal)]' },
+  { container: 'bg-orange-500/20 border border-orange-400/30',    text: 'font-sans text-xs text-[var(--color-text-orange)]' },
+  { container: 'bg-indigo-500/20 border border-indigo-400/30',  text: 'font-sans text-xs text-[var(--color-text-indigo)]' },
+  { container: 'bg-lime-500/20 border border-lime-400/30',      text: 'font-sans text-xs text-[var(--color-text-lime)]' },
+  { container: 'bg-violet-500/20 border border-violet-400/30',text: 'font-sans text-xs text-[var(--color-text-violet)]' },
 ];
 
 export const PROJECTS: Project[] = [

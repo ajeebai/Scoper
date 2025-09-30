@@ -10,7 +10,6 @@ import { ProjectSelector } from './components/ProjectSelector';
 import { Toolbar } from './components/Toolbar';
 import { ContextMenu } from './components/ContextMenu';
 import { themes } from './themes';
-import { analyzeImage } from './utils/imageAnalyzer';
 
 const STORAGE_KEY = 'interactiveScoperState';
 
@@ -28,11 +27,7 @@ const App: React.FC = () => {
   const [currency, setCurrency] = useState<'USD' | 'EUR' | 'GBP' | 'INR'>('USD');
   const [showPricePerDay, setShowPricePerDay] = useState(false);
   const [isSnapToGridEnabled, setIsSnapToGridEnabled] = useState(true);
-  const [themeId, setThemeId] = useState<string>('obsidian');
-  const [customBackground, setCustomBackground] = useState<string | null>(null);
-  const [isDraggingOver, setIsDraggingOver] = useState(false);
-  const [adaptiveStyles, setAdaptiveStyles] = useState<{ color: string; textShadow: string } | null>(null);
-
+  const [themeId, setThemeId] = useState<string>('default-dark');
   
   const [contextMenu, setContextMenu] = useState<{ x: number, y: number, task: Task } | null>(null);
 
@@ -47,10 +42,6 @@ const App: React.FC = () => {
             if (savedState.appText) setAppText(savedState.appText);
             if (savedState.currency) setCurrency(savedState.currency);
             if (savedState.themeId) setThemeId(savedState.themeId);
-            if (savedState.customBackground) {
-              setCustomBackground(savedState.customBackground);
-              analyzeImage(savedState.customBackground).then(setAdaptiveStyles);
-            }
         } catch (e) {
             console.error("Failed to parse saved state, resetting.", e);
             localStorage.removeItem(STORAGE_KEY);
@@ -66,37 +57,27 @@ const App: React.FC = () => {
         appText,
         currency,
         themeId,
-        customBackground: customBackground && customBackground.length < 4 * 1024 * 1024 ? customBackground : null,
     };
     try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
     } catch (e) {
         console.error("Failed to save state to localStorage", e);
     }
-  }, [projects, selectedProjectId, appText, currency, themeId, customBackground]);
+  }, [projects, selectedProjectId, appText, currency, themeId]);
 
-  // Apply theme colors as CSS variables
+  // Apply theme colors and background
   useEffect(() => {
     const selectedTheme = themes.find(t => t.id === themeId) || themes[0];
     const root = document.documentElement;
     Object.entries(selectedTheme.colors).forEach(([key, value]) => {
       root.style.setProperty(key, value);
     });
-  }, [themeId]);
 
-  // Apply custom background image
-  useEffect(() => {
-    const bgElement = document.getElementById('background-image');
-    if (bgElement) {
-        if (customBackground) {
-            bgElement.style.backgroundImage = `url(${customBackground})`;
-        } else {
-            // Reset to default from CSS
-            bgElement.style.backgroundImage = '';
-        }
+    const backgroundElement = document.getElementById('app-background');
+    if (backgroundElement) {
+      backgroundElement.style.backgroundImage = selectedTheme.background;
     }
-  }, [customBackground]);
-
+  }, [themeId]);
 
   const updateProject = useCallback((id: string, updateFn: (p: Project) => Project) => {
     setProjects(prevProjects => prevProjects.map(p => p.id === id ? updateFn(p) : p));
@@ -249,56 +230,6 @@ const App: React.FC = () => {
         tasks: p.tasks.filter(t => t.id !== taskId)
     }));
   };
-  
-  // --- Drag and Drop Handlers --- //
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-  }, []);
-
-  const handleDragEnter = useCallback((e: React.DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
-           setIsDraggingOver(true);
-      }
-  }, []);
-
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      // Check if leaving the window entirely
-      if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-          setIsDraggingOver(false);
-      }
-  }, []);
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsDraggingOver(false);
-
-      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-          const file = e.dataTransfer.files[0];
-          if (file.type.startsWith('image/')) {
-              const reader = new FileReader();
-              reader.onloadend = () => {
-                  const imageUrl = reader.result as string;
-                  setCustomBackground(imageUrl);
-                  analyzeImage(imageUrl).then(setAdaptiveStyles);
-              };
-              reader.readAsDataURL(file);
-          } else {
-              alert('Please drop an image file.');
-          }
-          e.dataTransfer.clearData();
-      }
-  }, []);
-  
-  const handleClearBackground = () => {
-      setCustomBackground(null);
-      setAdaptiveStyles(null);
-  };
 
   if (!project) {
     // This case should ideally not happen if state is managed correctly
@@ -309,27 +240,9 @@ const App: React.FC = () => {
     setSelectedProjectId(defaultProject.id);
     return <div className="text-text-primary min-h-screen flex items-center justify-center">Loading or no project selected...</div>;
   }
-  
-  const titleStyle = {
-    color: adaptiveStyles?.color,
-    textShadow: adaptiveStyles?.textShadow,
-    transition: 'color 0.3s ease-in-out',
-  };
 
   return (
-    <div 
-      id="app-container" 
-      className="text-text-primary font-sans min-h-screen w-full flex flex-col px-6 sm:px-10 lg:px-16 py-8 sm:py-12"
-      onDragOver={handleDragOver}
-      onDragEnter={handleDragEnter}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-    >
-      {isDraggingOver && (
-          <div id="drop-overlay" className="animate-fade-in">
-              <p id="drop-overlay-text">Drop Image to Set Background</p>
-          </div>
-      )}
+    <div id="app-container" className="text-text-primary font-sans min-h-screen w-full flex flex-col px-6 sm:px-10 lg:px-16 py-8 sm:py-12">
       <Toolbar 
         currency={currency}
         onCurrencyChange={setCurrency}
@@ -339,8 +252,6 @@ const App: React.FC = () => {
         onSnapToGridChange={setIsSnapToGridEnabled}
         currentThemeId={themeId}
         onThemeChange={setThemeId}
-        hasCustomBackground={!!customBackground}
-        onClearBackground={handleClearBackground}
       />
       <main className="flex-grow flex flex-col items-center">
         <div className="w-full max-w-screen-2xl text-left">
@@ -350,7 +261,6 @@ const App: React.FC = () => {
             onChange={(newVal) => setAppText(prev => ({...prev, title: newVal}))}
             wrapperClassName="app-title"
             className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight"
-            style={titleStyle}
           />
            <EditableText 
             tag="p"
@@ -358,11 +268,10 @@ const App: React.FC = () => {
             onChange={(newVal) => setAppText(prev => ({...prev, subtitle: newVal}))}
             wrapperClassName="app-subtitle"
             className="text-text-secondary mt-4 max-w-2xl"
-            style={titleStyle}
           />
         </div>
         
-        <div className="mt-12 sm:mt-16 bg-glass-bg backdrop-blur-lg border border-glass-border rounded-3xl w-full max-w-screen-2xl shadow-glass-glow">
+        <div className="mt-12 sm:mt-16 bg-glass-bg backdrop-blur-lg border border-glass-border rounded-3xl w-full max-w-screen-2xl">
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr_auto_1fr]">
             {/* --- SCOPE OF WORK --- */}
             <div className="p-6 sm:p-8">
