@@ -241,7 +241,7 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
   }, [project.tasks, isDayView]);
 
   return (
-    <div className="w-full bg-glass-bg backdrop-blur-lg border border-glass-border rounded-3xl overflow-hidden">
+    <div className="w-full bg-glass-bg backdrop-blur-lg border border-glass-border rounded-3xl overflow-hidden shadow-glass-glow">
       <div className="overflow-x-auto relative">
         <div 
           id="timeline-grid-container"
