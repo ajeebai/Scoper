@@ -57,7 +57,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ projects, sele
             <li>
                 <button
                 onClick={() => { onAddProject(); setIsAddMenuOpen(false); }}
-                className="w-full text-left text-sm px-3 py-1.5 rounded-md transition-colors text-text-primary hover:bg-white/10"
+                className="w-full text-left text-sm px-3 py-1.5 rounded-md transition-colors text-text-primary hover:bg-subtle-hover"
                 >
                 New Blank Scope
                 </button>
@@ -67,7 +67,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ projects, sele
                 <li key={template.name}>
                 <button
                     onClick={() => { onAddProjectFromTemplate(template.name); setIsAddMenuOpen(false); }}
-                    className="w-full text-left text-sm px-3 py-1.5 rounded-md transition-colors text-text-primary hover:bg-white/10"
+                    className="w-full text-left text-sm px-3 py-1.5 rounded-md transition-colors text-text-primary hover:bg-subtle-hover"
                 >
                     {template.name}
                 </button>
@@ -83,10 +83,10 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ projects, sele
           <div key={project.id} className="relative group">
             <button
               onClick={() => onSelectProject(project.id)}
-              className={`project-selector-button h-10 px-4 py-2 text-sm font-sans rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black/50 focus:ring-highlight
+              className={`project-selector-button h-10 px-4 py-2 text-sm font-sans rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background focus:ring-highlight
                 ${selectedProjectId === project.id 
                   ? 'bg-accent text-accent-text' 
-                  : 'text-text-secondary hover:bg-white/10 hover:text-text-primary'
+                  : 'text-text-secondary hover:bg-subtle-hover hover:text-text-primary'
                 }`}
             >
               <EditableText 
@@ -101,7 +101,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ projects, sele
                 e.stopPropagation();
                 onDeleteProject(project.id);
               }}
-              className="presentation-hide absolute -top-1 -right-1 w-5 h-5 bg-black/50 text-text-secondary rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100 z-10 hover:bg-red-500 hover:text-white"
+              className="presentation-hide absolute -top-1 -right-1 w-5 h-5 bg-glass-bg text-text-primary rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100 z-10 hover:bg-red-500 hover:text-white"
               aria-label={`Delete ${project.name}`}
             >
               &times;
@@ -112,7 +112,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ projects, sele
           <button 
             ref={addButtonRef}
             onClick={toggleMenu}
-            className="presentation-hide w-10 h-10 flex items-center justify-center text-xl font-sans border border-glass-border rounded-full text-text-secondary hover:bg-white/10 hover:border-white/20 transition-colors"
+            className="presentation-hide w-10 h-10 flex items-center justify-center text-xl font-sans border border-glass-border rounded-full text-text-secondary hover:bg-subtle-hover hover:border-white/20 transition-colors"
             aria-label="Add new project scope"
             aria-haspopup="true"
             aria-expanded={isAddMenuOpen}

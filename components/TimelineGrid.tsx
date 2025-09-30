@@ -244,6 +244,7 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
     <div className="w-full bg-glass-bg backdrop-blur-lg border border-glass-border rounded-3xl overflow-hidden">
       <div className="overflow-x-auto relative">
         <div 
+          id="timeline-grid-container"
           className="grid relative"
           style={{
             gridTemplateColumns: `150px repeat(${totalColumns}, 1fr)`,
@@ -255,6 +256,7 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
           
           {/* Timeline Header */}
           <div 
+            id="timeline-header-container"
             className="sticky top-0 z-20 bg-glass-bg/80 backdrop-blur-sm flex col-start-2 col-span-full"
             ref={timelineAreaRef}
           >
@@ -285,7 +287,7 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
             {/* Weekend shading */}
             {isDayView && Array.from({ length: project.totalWeeks }).map((_, weekIndex) => (
               <React.Fragment key={`weekend-${weekIndex}`}>
-                <div className="row-span-full bg-black/10" style={{gridColumn: `${weekIndex * 7 + 6} / span 2`}}></div>
+                <div className="row-span-full bg-weekend-shade" style={{gridColumn: `${weekIndex * 7 + 6} / span 2`}}></div>
               </React.Fragment>
             ))}
 
@@ -307,7 +309,7 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                         onClick={() => { if (!occupied) { playSound('add'); onAddTask(category.id, startPos); }}}
                       >
                         {hoveredCell?.row === rowIndex && hoveredCell?.col === colIndex && !occupied && (
-                          <div className="presentation-hide w-6 h-6 bg-white/5 rounded-full flex items-center justify-center cursor-pointer text-text-secondary group-hover:bg-white/10 group-hover:text-text-primary transition-all">
+                          <div className="presentation-hide w-6 h-6 rounded-full flex items-center justify-center cursor-pointer text-text-secondary group-hover:bg-subtle-hover group-hover:text-text-primary transition-all">
                             +
                           </div>
                         )}
@@ -398,7 +400,7 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
           <div className="col-start-1 row-start-auto sticky left-0 bg-glass-bg/80 backdrop-blur-sm z-10 flex items-center justify-center">
             <button 
               onClick={onAddCategory}
-              className="presentation-hide h-full w-full border-t border-glass-border text-text-secondary hover:text-text-primary hover:bg-white/5 transition-colors text-sm"
+              className="presentation-hide h-full w-full border-t border-glass-border text-text-secondary hover:text-text-primary hover:bg-subtle-hover transition-colors text-sm"
             >
               + Add Row
             </button>

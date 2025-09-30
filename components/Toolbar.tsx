@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { ThemeSwitcher } from './ThemeSwitcher';
+import { themes } from '../themes';
 
 type Currency = 'USD' | 'EUR' | 'GBP' | 'INR';
 
@@ -9,8 +11,10 @@ interface ToolbarProps {
   onShowPricePerDayChange: (show: boolean) => void;
   isSnapToGridEnabled: boolean;
   onSnapToGridChange: (enabled: boolean) => void;
-  onDownload: () => void;
-  isDownloading: boolean;
+  currentThemeId: string;
+  onThemeChange: (themeId: string) => void;
+  hasCustomBackground: boolean;
+  onClearBackground: () => void;
 }
 
 const CURRENCY_SYMBOLS: { [key in Currency]: string } = {
@@ -45,11 +49,12 @@ const LineIcon: React.FC<{ className?: string }> = ({ className }) => (
         <path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/>
     </svg>
 );
-const DownloadIcon: React.FC<{className?: string}> = ({className}) => (
+const ResetIcon: React.FC<{className?: string}> = ({className}) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-      <polyline points="7 10 12 15 17 10"/>
-      <line x1="12" y1="15" x2="12" y2="3"/>
+        <path d="M3 2v6h6" />
+        <path d="M21 12A9 9 0 0 0 6 5.3L3 8" />
+        <path d="M21 22v-6h-6" />
+        <path d="M3 12a9 9 0 0 0 15 6.7l3-2.7" />
     </svg>
 );
 
@@ -58,7 +63,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     currency, onCurrencyChange,
     showPricePerDay, onShowPricePerDayChange,
     isSnapToGridEnabled, onSnapToGridChange,
-    onDownload, isDownloading
+    currentThemeId, onThemeChange,
+    hasCustomBackground, onClearBackground,
 }) => {
     const [isCurrencyDropdownOpen, setIsCurrencyDropdownOpen] = useState(false);
     const currencyDropdownRef = useRef<HTMLDivElement>(null);
@@ -79,35 +85,34 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     return (
         <div id="app-toolbar" className="presentation-hide fixed top-6 right-6 sm:top-8 sm:right-8 z-50">
             <div className="flex items-center gap-2 bg-glass-bg/80 backdrop-blur-md border border-glass-border rounded-full p-1.5">
-                <button 
-                    onClick={onDownload}
-                    disabled={isDownloading}
-                    className="w-10 h-10 flex items-center justify-center rounded-full text-text-secondary hover:bg-white/10 hover:text-text-primary transition-colors disabled:opacity-50 disabled:cursor-wait"
-                    aria-label="Download as PNG"
-                >
-                    {isDownloading ? (
-                        <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-text-primary"></span>
-                    ) : (
-                        <DownloadIcon className="w-5 h-5" />
-                    )}
-                </button>
+                <ThemeSwitcher themes={themes} currentThemeId={currentThemeId} onThemeChange={onThemeChange} />
+
+                {hasCustomBackground && (
+                    <button
+                        onClick={onClearBackground}
+                        className="w-10 h-10 flex items-center justify-center rounded-full text-text-secondary hover:bg-subtle-hover hover:text-text-primary transition-colors"
+                        aria-label="Reset background image"
+                    >
+                        <ResetIcon className="w-5 h-5" />
+                    </button>
+                )}
 
                 <div className="w-px h-6 bg-glass-border mx-1"></div>
 
                 <div ref={currencyDropdownRef} className="relative">
                     <button 
                         onClick={() => setIsCurrencyDropdownOpen(!isCurrencyDropdownOpen)}
-                        className="w-10 h-10 flex items-center justify-center rounded-full text-text-secondary hover:bg-white/10 hover:text-text-primary transition-colors"
+                        className="w-10 h-10 flex items-center justify-center rounded-full text-text-secondary hover:bg-subtle-hover hover:text-text-primary transition-colors"
                     >
                          <span className="font-mono text-xl">{CURRENCY_SYMBOLS[currency]}</span>
                     </button>
                     {isCurrencyDropdownOpen && (
-                        <div className="absolute top-12 right-0 bg-glass-bg border border-glass-border rounded-2xl p-1.5 flex flex-col gap-1.5 w-max shadow-2xl">
+                        <div className="absolute top-12 right-0 bg-glass-bg border border-glass-border rounded-2xl p-1.5 flex flex-col gap-1.5 w-max shadow-2xl animate-fade-in">
                              {(Object.keys(CURRENCY_SYMBOLS) as Array<keyof typeof CURRENCY_SYMBOLS>).map(c => (
                                 <button
                                     key={c}
                                     onClick={() => { onCurrencyChange(c); setIsCurrencyDropdownOpen(false); }}
-                                    className={`w-full h-10 px-3 flex items-center justify-center rounded-xl font-mono text-xl transition-colors ${currency === c ? 'bg-accent text-accent-text' : 'text-text-secondary hover:bg-white/10'}`}
+                                    className={`w-full h-10 px-3 flex items-center justify-center rounded-xl font-mono text-xl transition-colors ${currency === c ? 'bg-accent text-accent-text' : 'text-text-secondary hover:bg-subtle-hover'}`}
                                 >
                                     {c}
                                 </button>
@@ -118,7 +123,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 
                 <button
                     onClick={() => onShowPricePerDayChange(!showPricePerDay)}
-                    className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors ${showPricePerDay ? 'bg-accent text-accent-text' : 'text-text-secondary hover:bg-white/10 hover:text-text-primary'}`}
+                    className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors ${showPricePerDay ? 'bg-accent text-accent-text' : 'text-text-secondary hover:bg-subtle-hover hover:text-text-primary'}`}
                     aria-label={showPricePerDay ? "Hide price per day" : "Show price per day"}
                     aria-pressed={showPricePerDay}
                 >
@@ -127,7 +132,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
                 <button
                     onClick={() => onSnapToGridChange(!isSnapToGridEnabled)}
-                    className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors ${isSnapToGridEnabled ? 'bg-accent text-accent-text' : 'text-text-secondary hover:bg-white/10 hover:text-text-primary'}`}
+                    className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors ${isSnapToGridEnabled ? 'bg-accent text-accent-text' : 'text-text-secondary hover:bg-subtle-hover hover:text-text-primary'}`}
                     aria-label={isSnapToGridEnabled ? "Disable snap to grid" : "Enable snap to grid"}
                     aria-pressed={isSnapToGridEnabled}
                 >

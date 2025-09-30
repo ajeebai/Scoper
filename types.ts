@@ -18,6 +18,8 @@ export interface Project {
   tasks: Task[];
   cost: number;
   totalWeeks: number;
+  categories: Category[];
+  categoryStyles: { [key:string]: CategoryStyle };
 }
 
 export interface CategoryStyle {

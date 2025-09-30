@@ -1,85 +1,96 @@
-import React, { useState, useMemo, useCallback } from 'react';
+
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { CostDisplay } from './components/CostDisplay';
 import { TimelineGrid } from './components/TimelineGrid';
 import { ProjectSummary } from './components/ProjectSummary';
-import { PROJECTS, CATEGORIES, CATEGORY_STYLES, THEME_COLORS, PROJECT_TEMPLATES } from './constants';
+import { PROJECTS, THEME_COLORS, PROJECT_TEMPLATES, DEFAULT_CATEGORIES, DEFAULT_CATEGORY_STYLES } from './constants';
 import type { Project, Task, Category, CategoryStyle } from './types';
 import { EditableText } from './components/EditableText';
 import { ProjectSelector } from './components/ProjectSelector';
 import { Toolbar } from './components/Toolbar';
 import { ContextMenu } from './components/ContextMenu';
+import { themes } from './themes';
 
-// Add declarations for CDN libraries
-declare const html2canvas: any;
+const STORAGE_KEY = 'interactiveScoperState';
 
 const App: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>(PROJECTS);
   const [selectedProjectId, setSelectedProjectId] = useState<string>(PROJECTS[0].id);
 
-  const project = useMemo(() => projects.find(p => p.id === selectedProjectId)!, [projects, selectedProjectId]);
+  const project = useMemo(() => projects.find(p => p.id === selectedProjectId) || projects[0], [projects, selectedProjectId]);
 
   const [appText, setAppText] = useState({
     title: 'Interactive Project Scoper',
     subtitle: "Visually plan your projects, estimate costs, and create beautiful timelines."
   });
-  const [categories, setCategories] = useState<Category[]>(CATEGORIES);
-  const [dynamicCategoryStyles, setDynamicCategoryStyles] = useState<{ [key: string]: CategoryStyle }>({});
   
   const [currency, setCurrency] = useState<'USD' | 'EUR' | 'GBP' | 'INR'>('USD');
   const [showPricePerDay, setShowPricePerDay] = useState(false);
   const [isSnapToGridEnabled, setIsSnapToGridEnabled] = useState(true);
+  const [themeId, setThemeId] = useState<string>('default-dark');
+  const [customBackground, setCustomBackground] = useState<string | null>(null);
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
   
   const [contextMenu, setContextMenu] = useState<{ x: number, y: number, task: Task } | null>(null);
 
-  const [isDownloading, setIsDownloading] = useState(false);
-  
-  const handleDownload = async () => {
-    setIsDownloading(true);
-    const appElement = document.getElementById('app-container');
-
-    if (!appElement) {
-        console.error('Capture element not found');
-        setIsDownloading(false);
-        return;
+  // Load state from localStorage on initial mount
+  useEffect(() => {
+    const savedStateJSON = localStorage.getItem(STORAGE_KEY);
+    if (savedStateJSON) {
+        try {
+            const savedState = JSON.parse(savedStateJSON);
+            if (savedState.projects && savedState.projects.length > 0) setProjects(savedState.projects);
+            if (savedState.selectedProjectId) setSelectedProjectId(savedState.selectedProjectId);
+            if (savedState.appText) setAppText(savedState.appText);
+            if (savedState.currency) setCurrency(savedState.currency);
+            if (savedState.themeId) setThemeId(savedState.themeId);
+            if (savedState.customBackground) setCustomBackground(savedState.customBackground);
+        } catch (e) {
+            console.error("Failed to parse saved state, resetting.", e);
+            localStorage.removeItem(STORAGE_KEY);
+        }
     }
+  }, []);
 
-    appElement.classList.add('presentation-mode');
-    
-    // Wait for fonts and a moment for any transitions to finish.
-    await document.fonts.ready;
-    await new Promise(resolve => setTimeout(resolve, 100));
-
+  // Save state to localStorage whenever it changes
+  useEffect(() => {
+    const stateToSave = {
+        projects,
+        selectedProjectId,
+        appText,
+        currency,
+        themeId,
+        customBackground: customBackground && customBackground.length < 4 * 1024 * 1024 ? customBackground : null,
+    };
     try {
-        const canvas = await html2canvas(appElement, {
-            backgroundColor: '#111111',
-            useCORS: true,
-            scale: 2,
-            scrollX: 0,
-            scrollY: -window.scrollY,
-            onclone: (clonedDoc: Document) => {
-              // The main logic is now handled by CSS in presentation-mode.
-              // We just need to remove contenteditable attributes to prevent focus rings.
-              clonedDoc.querySelectorAll('[contenteditable="true"]').forEach(el => {
-                  el.removeAttribute('contenteditable');
-              });
-            },
-        });
-        
-        const image = canvas.toDataURL('image/png', 1.0);
-        const link = document.createElement('a');
-        link.href = image;
-        link.download = `${project.name.replace(/ /g, '_')}_scope.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-    } catch (error) {
-        console.error('Error generating file:', error);
-    } finally {
-        appElement.classList.remove('presentation-mode');
-        setIsDownloading(false);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
+    } catch (e) {
+        console.error("Failed to save state to localStorage", e);
     }
-  };
+  }, [projects, selectedProjectId, appText, currency, themeId, customBackground]);
+
+  // Apply theme colors as CSS variables
+  useEffect(() => {
+    const selectedTheme = themes.find(t => t.id === themeId) || themes[0];
+    const root = document.documentElement;
+    Object.entries(selectedTheme.colors).forEach(([key, value]) => {
+      root.style.setProperty(key, value);
+    });
+  }, [themeId]);
+
+  // Apply custom background image
+  useEffect(() => {
+    const bgElement = document.getElementById('background-image');
+    if (bgElement) {
+        if (customBackground) {
+            bgElement.style.backgroundImage = `url(${customBackground})`;
+        } else {
+            // Reset to default from CSS
+            bgElement.style.backgroundImage = '';
+        }
+    }
+  }, [customBackground]);
+
 
   const updateProject = useCallback((id: string, updateFn: (p: Project) => Project) => {
     setProjects(prevProjects => prevProjects.map(p => p.id === id ? updateFn(p) : p));
@@ -123,6 +134,8 @@ const App: React.FC = () => {
       tasks: [],
       cost: 5000,
       totalWeeks: 4,
+      categories: DEFAULT_CATEGORIES,
+      categoryStyles: DEFAULT_CATEGORY_STYLES,
     };
     setProjects(prev => [...prev, newProject]);
     setSelectedProjectId(newProject.id);
@@ -178,6 +191,8 @@ const App: React.FC = () => {
           tasks: [],
           cost: 5000,
           totalWeeks: 4,
+          categories: DEFAULT_CATEGORIES,
+          categoryStyles: DEFAULT_CATEGORY_STYLES,
         };
         setSelectedProjectId(newProject.id);
         return [newProject];
@@ -186,22 +201,31 @@ const App: React.FC = () => {
   };
 
   const handleAddCategory = () => {
-    const dynamicCategories = categories.filter(c => !CATEGORIES.some(initial => initial.id === c.id));
-    const nextStageNumber = dynamicCategories.length + 1;
-
+    const project = projects.find(p => p.id === selectedProjectId);
+    if (!project) return;
+  
     const newCategory: Category = {
       id: `category-${Date.now()}`,
-      name: `Stage ${nextStageNumber.toString().padStart(2, '0')}`
+      name: `New Stage`
     };
     
-    const nextColor = THEME_COLORS[dynamicCategories.length % THEME_COLORS.length];
+    const nextColor = THEME_COLORS[project.categories.length % THEME_COLORS.length];
     
-    setDynamicCategoryStyles(prev => ({...prev, [newCategory.id]: nextColor}));
-    setCategories(prev => [...prev, newCategory]);
+    updateProject(selectedProjectId, p => ({
+      ...p,
+      categories: [...p.categories, newCategory],
+      categoryStyles: {
+        ...p.categoryStyles,
+        [newCategory.id]: nextColor
+      }
+    }));
   };
 
   const handleCategoryNameChange = (id: string, newName: string) => {
-    setCategories(prev => prev.map(c => c.id === id ? { ...c, name: newName } : c));
+    updateProject(selectedProjectId, p => ({
+      ...p,
+      categories: p.categories.map(c => c.id === id ? { ...c, name: newName } : c)
+    }));
   };
 
   const handleTaskContextMenu = (event: React.MouseEvent, task: Task) => {
@@ -219,13 +243,78 @@ const App: React.FC = () => {
         tasks: p.tasks.filter(t => t.id !== taskId)
     }));
   };
+  
+  // --- Drag and Drop Handlers --- //
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+  }, []);
+
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+           setIsDraggingOver(true);
+      }
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      // Check if leaving the window entirely
+      if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+          setIsDraggingOver(false);
+      }
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDraggingOver(false);
+
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          const file = e.dataTransfer.files[0];
+          if (file.type.startsWith('image/')) {
+              const reader = new FileReader();
+              reader.onloadend = () => {
+                  setCustomBackground(reader.result as string);
+              };
+              reader.readAsDataURL(file);
+          } else {
+              alert('Please drop an image file.');
+          }
+          e.dataTransfer.clearData();
+      }
+  }, []);
+  
+  const handleClearBackground = () => {
+      setCustomBackground(null);
+  };
 
   if (!project) {
+    // This case should ideally not happen if state is managed correctly
+    const defaultProject = PROJECTS[0];
+    if (projects.length === 0) {
+        setProjects([defaultProject]);
+    }
+    setSelectedProjectId(defaultProject.id);
     return <div className="text-text-primary min-h-screen flex items-center justify-center">Loading or no project selected...</div>;
   }
 
   return (
-    <div id="app-container" className="text-text-primary font-sans min-h-screen w-full flex flex-col px-6 sm:px-10 lg:px-16 py-8 sm:py-12">
+    <div 
+      id="app-container" 
+      className="text-text-primary font-sans min-h-screen w-full flex flex-col px-6 sm:px-10 lg:px-16 py-8 sm:py-12"
+      onDragOver={handleDragOver}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {isDraggingOver && (
+          <div id="drop-overlay" className="animate-fade-in">
+              <p id="drop-overlay-text">Drop Image to Set Background</p>
+          </div>
+      )}
       <Toolbar 
         currency={currency}
         onCurrencyChange={setCurrency}
@@ -233,8 +322,10 @@ const App: React.FC = () => {
         onShowPricePerDayChange={setShowPricePerDay}
         isSnapToGridEnabled={isSnapToGridEnabled}
         onSnapToGridChange={setIsSnapToGridEnabled}
-        onDownload={handleDownload}
-        isDownloading={isDownloading}
+        currentThemeId={themeId}
+        onThemeChange={setThemeId}
+        hasCustomBackground={!!customBackground}
+        onClearBackground={handleClearBackground}
       />
       <main className="flex-grow flex flex-col items-center">
         <div className="w-full max-w-screen-2xl text-left">
@@ -301,16 +392,16 @@ const App: React.FC = () => {
             project={project} 
             onTaskUpdate={handleTaskUpdate}
             onAddTask={handleAddTask}
-            categories={categories}
+            categories={project.categories}
             onCategoryNameChange={handleCategoryNameChange}
             onAddCategory={handleAddCategory}
             isSnapToGridEnabled={isSnapToGridEnabled}
-            categoryStyles={{...CATEGORY_STYLES, ...dynamicCategoryStyles}}
+            categoryStyles={project.categoryStyles}
             onTaskContextMenu={handleTaskContextMenu}
           />
         </div>
       </main>
-      <footer className="w-full max-w-screen-2xl mx-auto mt-auto pt-8 flex justify-between items-center">
+      <footer className="w-full max-w-screen-2xl mx-auto mt-auto pt-8 grid grid-cols-3 items-center">
          <div className="flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors cursor-default">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 3H21V21H3V3Z"/>
@@ -318,7 +409,12 @@ const App: React.FC = () => {
             </svg>
             <span className="font-sans text-sm font-bold">Scoper</span>
          </div>
-         <div>
+         <div className="text-center">
+            <a href="https://buymeacoffee.com/notajeeb" target="_blank" rel="noopener noreferrer" className="font-mono text-xs uppercase text-text-secondary hover:text-text-primary transition-colors underline decoration-text-secondary/30 underline-offset-4">
+              Buy me a coffee
+            </a>
+         </div>
+         <div className="text-right">
             <a href="https://bykins.com" target="_blank" rel="noopener noreferrer" className="font-mono text-xs uppercase text-text-secondary hover:text-text-primary transition-colors underline decoration-text-secondary/30 underline-offset-4">
               Made by Kins
             </a>

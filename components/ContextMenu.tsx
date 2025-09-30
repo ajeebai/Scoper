@@ -58,7 +58,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ x, y, items, onClose }
               className={`w-full text-left text-sm px-3 py-1.5 rounded-md transition-colors ${
                 item.isDestructive
                   ? 'text-red-400 hover:bg-red-500/20'
-                  : 'text-text-primary hover:bg-white/10'
+                  : 'text-text-primary hover:bg-subtle-hover'
               }`}
             >
               {item.label}
