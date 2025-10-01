@@ -10,6 +10,7 @@ import { ProjectSelector } from './components/ProjectSelector';
 import { Toolbar } from './components/Toolbar';
 import { ContextMenu } from './components/ContextMenu';
 import { themes } from './themes';
+import { MobileBlocker } from './components/MobileBlocker';
 
 const STORAGE_KEY = 'interactiveScoperState';
 
@@ -237,129 +238,132 @@ const App: React.FC = () => {
   }
 
   return (
-    <div id="app-container" className="text-text-primary font-sans min-h-screen w-full flex flex-col px-6 sm:px-10 lg:px-16 py-8 sm:py-12">
-      <Toolbar 
-        currency={currency}
-        onCurrencyChange={setCurrency}
-        showPricePerDay={showPricePerDay}
-        onShowPricePerDayChange={setShowPricePerDay}
-        isSnapToGridEnabled={isSnapToGridEnabled}
-        onSnapToGridChange={setIsSnapToGridEnabled}
-        currentThemeId={themeId}
-        onThemeChange={setThemeId}
-      />
-      <main className="flex-grow flex flex-col items-center">
-        <div className="w-full max-w-screen-2xl text-left">
-          <EditableText 
-            tag="h1"
-            value={appText.title}
-            onChange={(newVal) => setAppText(prev => ({...prev, title: newVal}))}
-            wrapperClassName="app-title"
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight"
-          />
-           <EditableText 
-            tag="p"
-            value={appText.subtitle}
-            onChange={(newVal) => setAppText(prev => ({...prev, subtitle: newVal}))}
-            wrapperClassName="app-subtitle"
-            className="text-text-secondary mt-4 max-w-2xl"
-          />
-        </div>
-        
-        <div className="mt-12 sm:mt-16 bg-glass-bg backdrop-blur-lg border border-glass-border rounded-3xl w-full max-w-screen-2xl">
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr_auto_1fr]">
-            {/* --- SCOPE OF WORK --- */}
-            <div className="p-6 sm:p-8">
-              <div className="flex items-center mb-6">
-                 <p className="font-mono text-xs uppercase text-text-secondary">Scope of Work</p>
+    <>
+      <div id="app-container" className="hidden md:flex text-text-primary font-sans min-h-screen w-full flex-col px-6 sm:px-10 lg:px-16 py-8 sm:py-12">
+        <Toolbar 
+          currency={currency}
+          onCurrencyChange={setCurrency}
+          showPricePerDay={showPricePerDay}
+          onShowPricePerDayChange={setShowPricePerDay}
+          isSnapToGridEnabled={isSnapToGridEnabled}
+          onSnapToGridChange={setIsSnapToGridEnabled}
+          currentThemeId={themeId}
+          onThemeChange={setThemeId}
+        />
+        <main className="flex-grow flex flex-col items-center">
+          <div className="w-full max-w-screen-2xl text-left">
+            <EditableText 
+              tag="h1"
+              value={appText.title}
+              onChange={(newVal) => setAppText(prev => ({...prev, title: newVal}))}
+              wrapperClassName="app-title"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-tight"
+            />
+             <EditableText 
+              tag="p"
+              value={appText.subtitle}
+              onChange={(newVal) => setAppText(prev => ({...prev, subtitle: newVal}))}
+              wrapperClassName="app-subtitle"
+              className="text-text-secondary mt-4 max-w-2xl"
+            />
+          </div>
+          
+          <div className="mt-12 sm:mt-16 bg-glass-bg backdrop-blur-lg border border-glass-border rounded-3xl w-full max-w-screen-2xl">
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr_auto_1fr]">
+              {/* --- SCOPE OF WORK --- */}
+              <div className="p-6 sm:p-8">
+                <div className="flex items-center mb-6">
+                   <p className="font-mono text-xs uppercase text-text-secondary">Scope of Work</p>
+                </div>
+                <ProjectSelector
+                  projects={projects}
+                  selectedProjectId={selectedProjectId}
+                  onSelectProject={setSelectedProjectId}
+                  onAddProject={handleAddProject}
+                  onAddProjectFromTemplate={handleAddProjectFromTemplate}
+                  onProjectNameChange={handleProjectNameChange}
+                  onDeleteProject={handleDeleteProject}
+                />
               </div>
-              <ProjectSelector
-                projects={projects}
-                selectedProjectId={selectedProjectId}
-                onSelectProject={setSelectedProjectId}
-                onAddProject={handleAddProject}
-                onAddProjectFromTemplate={handleAddProjectFromTemplate}
-                onProjectNameChange={handleProjectNameChange}
-                onDeleteProject={handleDeleteProject}
-              />
-            </div>
 
-            {/* --- DIVIDER 1 --- */}
-            <div className="hidden lg:block w-px bg-glass-border my-8"></div>
+              {/* --- DIVIDER 1 --- */}
+              <div className="hidden lg:block w-px bg-glass-border my-8"></div>
 
-            {/* --- PROJECT TIME --- */}
-            <div className="border-t lg:border-t-0 border-glass-border p-6 sm:p-8">
-              <ProjectSummary duration={project.totalWeeks} onDurationChange={handleTotalWeeksChange} />
-            </div>
+              {/* --- PROJECT TIME --- */}
+              <div className="border-t lg:border-t-0 border-glass-border p-6 sm:p-8">
+                <ProjectSummary duration={project.totalWeeks} onDurationChange={handleTotalWeeksChange} />
+              </div>
 
-            {/* --- DIVIDER 2 --- */}
-            <div className="hidden lg:block w-px bg-glass-border my-8"></div>
-            
-            {/* --- PRICE --- */}
-            <div className="border-t lg:border-t-0 border-glass-border p-6 sm:p-8">
-               <CostDisplay 
-                cost={project.cost} 
-                onCostChange={handleCostChange}
-                currency={currency}
-                showPricePerDay={showPricePerDay}
-                totalWeeks={project.totalWeeks}
-              />
+              {/* --- DIVIDER 2 --- */}
+              <div className="hidden lg:block w-px bg-glass-border my-8"></div>
+              
+              {/* --- PRICE --- */}
+              <div className="border-t lg:border-t-0 border-glass-border p-6 sm:p-8">
+                 <CostDisplay 
+                  cost={project.cost} 
+                  onCostChange={handleCostChange}
+                  currency={currency}
+                  showPricePerDay={showPricePerDay}
+                  totalWeeks={project.totalWeeks}
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="mt-8 w-full max-w-screen-2xl flex-grow relative">
-          <TimelineGrid 
-            project={project} 
-            onTaskUpdate={handleTaskUpdate}
-            onAddTask={handleAddTask}
-            categories={project.categories}
-            onCategoryNameChange={handleCategoryNameChange}
-            onAddCategory={handleAddCategory}
-            isSnapToGridEnabled={isSnapToGridEnabled}
-            categoryStyles={project.categoryStyles}
-            onTaskContextMenu={handleTaskContextMenu}
+          <div className="mt-8 w-full max-w-screen-2xl flex-grow relative">
+            <TimelineGrid 
+              project={project} 
+              onTaskUpdate={handleTaskUpdate}
+              onAddTask={handleAddTask}
+              categories={project.categories}
+              onCategoryNameChange={handleCategoryNameChange}
+              onAddCategory={handleAddCategory}
+              isSnapToGridEnabled={isSnapToGridEnabled}
+              categoryStyles={project.categoryStyles}
+              onTaskContextMenu={handleTaskContextMenu}
+            />
+          </div>
+        </main>
+        <footer className="w-full max-w-screen-2xl mx-auto mt-auto pt-8 grid grid-cols-3 items-center">
+           <div className="flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors cursor-default">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M3 3H21V21H3V3Z"/>
+                  <path d="M3 15C9.62742 15 15 9.62742 15 3"/>
+              </svg>
+              <span className="font-sans text-sm font-bold">Scoper</span>
+           </div>
+           <div className="text-center">
+              <a href="https://buymeacoffee.com/notajeeb" target="_blank" rel="noopener noreferrer" className="font-mono text-xs uppercase text-text-secondary hover:text-text-primary transition-colors underline decoration-text-secondary/30 underline-offset-4">
+                Buy me a coffee
+              </a>
+           </div>
+           <div className="text-right">
+              <a href="https://bykins.com" target="_blank" rel="noopener noreferrer" className="font-mono text-xs uppercase text-text-secondary hover:text-text-primary transition-colors underline decoration-text-secondary/30 underline-offset-4">
+                Made by Kins
+              </a>
+           </div>
+        </footer>
+        {contextMenu && (
+          <ContextMenu
+            x={contextMenu.x}
+            y={contextMenu.y}
+            onClose={handleCloseContextMenu}
+            items={[
+              {
+                label: contextMenu.task.isDeliverable ? 'Unmark as Deliverable' : 'Mark as Deliverable',
+                action: () => handleTaskUpdate(contextMenu.task.id, { isDeliverable: !contextMenu.task.isDeliverable }),
+              },
+              {
+                label: 'Delete Task',
+                action: () => handleDeleteTask(contextMenu.task.id),
+                isDestructive: true,
+              },
+            ]}
           />
-        </div>
-      </main>
-      <footer className="w-full max-w-screen-2xl mx-auto mt-auto pt-8 grid grid-cols-3 items-center">
-         <div className="flex items-center gap-2 text-text-secondary hover:text-text-primary transition-colors cursor-default">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 3H21V21H3V3Z"/>
-                <path d="M3 15C9.62742 15 15 9.62742 15 3"/>
-            </svg>
-            <span className="font-sans text-sm font-bold">Scoper</span>
-         </div>
-         <div className="text-center">
-            <a href="https://buymeacoffee.com/notajeeb" target="_blank" rel="noopener noreferrer" className="font-mono text-xs uppercase text-text-secondary hover:text-text-primary transition-colors underline decoration-text-secondary/30 underline-offset-4">
-              Buy me a coffee
-            </a>
-         </div>
-         <div className="text-right">
-            <a href="https://bykins.com" target="_blank" rel="noopener noreferrer" className="font-mono text-xs uppercase text-text-secondary hover:text-text-primary transition-colors underline decoration-text-secondary/30 underline-offset-4">
-              Made by Kins
-            </a>
-         </div>
-      </footer>
-      {contextMenu && (
-        <ContextMenu
-          x={contextMenu.x}
-          y={contextMenu.y}
-          onClose={handleCloseContextMenu}
-          items={[
-            {
-              label: contextMenu.task.isDeliverable ? 'Unmark as Deliverable' : 'Mark as Deliverable',
-              action: () => handleTaskUpdate(contextMenu.task.id, { isDeliverable: !contextMenu.task.isDeliverable }),
-            },
-            {
-              label: 'Delete Task',
-              action: () => handleDeleteTask(contextMenu.task.id),
-              isDestructive: true,
-            },
-          ]}
-        />
-      )}
-    </div>
+        )}
+      </div>
+      <MobileBlocker />
+    </>
   );
 };
 
