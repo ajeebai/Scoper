@@ -50,7 +50,6 @@ export const EditableText: React.FC<EditableTextProps> = ({
             el.style.lineHeight = '';
             el.style.whiteSpace = 'normal';
             el.style.overflowWrap = 'normal';
-            if(isEditing) el.style.whiteSpace = 'nowrap';
             return;
         }
         
