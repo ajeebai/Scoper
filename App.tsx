@@ -20,14 +20,14 @@ const App: React.FC = () => {
   const project = useMemo(() => projects.find(p => p.id === selectedProjectId) || projects[0], [projects, selectedProjectId]);
 
   const [appText, setAppText] = useState({
-    title: 'Interactive Project Scoper',
+    title: 'Click to Change',
     subtitle: "Visually plan your projects, estimate costs, and create beautiful timelines."
   });
   
   const [currency, setCurrency] = useState<'USD' | 'EUR' | 'GBP' | 'INR'>('USD');
   const [showPricePerDay, setShowPricePerDay] = useState(false);
   const [isSnapToGridEnabled, setIsSnapToGridEnabled] = useState(true);
-  const [themeId, setThemeId] = useState<string>('default-dark');
+  const [themeId, setThemeId] = useState<string>('dark');
   
   const [contextMenu, setContextMenu] = useState<{ x: number, y: number, task: Task } | null>(null);
 
@@ -65,18 +65,13 @@ const App: React.FC = () => {
     }
   }, [projects, selectedProjectId, appText, currency, themeId]);
 
-  // Apply theme colors and background
+  // Apply theme colors
   useEffect(() => {
     const selectedTheme = themes.find(t => t.id === themeId) || themes[0];
     const root = document.documentElement;
     Object.entries(selectedTheme.colors).forEach(([key, value]) => {
       root.style.setProperty(key, value);
     });
-
-    const backgroundElement = document.getElementById('app-background');
-    if (backgroundElement) {
-      backgroundElement.style.backgroundImage = selectedTheme.background;
-    }
   }, [themeId]);
 
   const updateProject = useCallback((id: string, updateFn: (p: Project) => Project) => {

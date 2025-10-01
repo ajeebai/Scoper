@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ThemeSwitcher } from './ThemeSwitcher';
-import { themes } from '../themes';
 
 type Currency = 'USD' | 'EUR' | 'GBP' | 'INR';
 
@@ -74,7 +73,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     return (
         <div id="app-toolbar" className="presentation-hide fixed top-6 right-6 sm:top-8 sm:right-8 z-50">
             <div className="flex items-center gap-2 bg-glass-bg/80 backdrop-blur-md border border-glass-border rounded-full p-1.5">
-                <ThemeSwitcher themes={themes} currentThemeId={currentThemeId} onThemeChange={onThemeChange} />
+                <ThemeSwitcher currentThemeId={currentThemeId} onThemeChange={onThemeChange} />
 
                 <div className="w-px h-6 bg-glass-border mx-1"></div>
 

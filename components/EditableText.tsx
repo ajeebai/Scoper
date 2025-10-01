@@ -9,6 +9,7 @@ interface EditableTextProps {
   autoFit?: boolean;
   wrapperClassName?: string;
   containerIsFullHeight?: boolean;
+  onEditingChange?: (isEditing: boolean) => void;
 }
 
 const PencilIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -26,9 +27,14 @@ export const EditableText: React.FC<EditableTextProps> = ({
   autoFit = false,
   wrapperClassName,
   containerIsFullHeight = true,
+  onEditingChange,
 }) => {
   const elementRef = useRef<HTMLElement>(null);
   const [isEditing, setIsEditing] = useState(false);
+
+  useEffect(() => {
+    onEditingChange?.(isEditing);
+  }, [isEditing, onEditingChange]);
 
   useLayoutEffect(() => {
     const element = elementRef.current;
@@ -165,7 +171,7 @@ export const EditableText: React.FC<EditableTextProps> = ({
         dangerouslySetInnerHTML={{ __html: value }}
       />
       {!isEditing && (
-        <div className="presentation-hide absolute -right-7 top-1/2 -translate-y-1/2 w-6 h-6 bg-subtle-hover/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all pointer-events-auto cursor-pointer hover:bg-subtle-hover">
+        <div className={`presentation-hide absolute -right-7 top-1/2 -translate-y-1/2 w-6 h-6 bg-subtle-hover/50 rounded-full flex items-center justify-center transition-all pointer-events-auto cursor-pointer hover:bg-subtle-hover opacity-0 group-hover:opacity-100`}>
             <PencilIcon className="w-3 h-3 text-text-primary" />
         </div>
       )}

@@ -377,13 +377,13 @@ export const TimelineGrid: React.FC<TimelineGridProps> = ({
                     onContextMenu={(e) => onTaskContextMenu(e, task)}
                     style={style}
                   >
-                    <div className="task-item-inner-wrapper flex items-start gap-2 overflow-hidden h-full w-full">
-                        {isDeliverable && <StarIcon className="w-3 h-3 text-highlight/80 flex-shrink-0 mt-1"/>}
+                    <div className="task-item-inner-wrapper flex items-center gap-2 overflow-hidden h-full w-full">
+                        {isDeliverable && <StarIcon className="w-3 h-3 text-highlight/80 flex-shrink-0"/>}
                         <EditableText
                             tag="p"
                             value={task.name}
                             onChange={(newName) => onTaskUpdate(task.id, { name: newName })}
-                            className={`text-left w-full h-full ${categoryStyle.text}`}
+                            className={`text-left w-full h-full ${categoryStyle.text} flex items-center`}
                             autoFit={true}
                         />
                     </div>

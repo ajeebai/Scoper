@@ -19,6 +19,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ projects, sele
   const addButtonRef = useRef<HTMLButtonElement>(null);
   const addMenuRef = useRef<HTMLDivElement>(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
+  const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
 
   const toggleMenu = () => {
     if (!isAddMenuOpen && addButtonRef.current) {
@@ -79,35 +80,49 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ projects, sele
 
   return (
       <div className="flex flex-wrap gap-2 items-center">
-        {projects.map(project => (
-          <div key={project.id} className="relative group">
-            <button
-              onClick={() => onSelectProject(project.id)}
-              className={`project-selector-button h-10 px-4 py-2 text-sm font-sans rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background focus:ring-highlight
-                ${selectedProjectId === project.id 
-                  ? 'bg-accent text-accent-text' 
-                  : 'text-text-secondary hover:bg-subtle-hover hover:text-text-primary'
-                }`}
-            >
-              <EditableText 
-                value={project.name}
-                onChange={(newName) => onProjectNameChange(project.id, newName)}
-                tag="span"
-                className="outline-none"
-              />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onDeleteProject(project.id);
-              }}
-              className="presentation-hide absolute -top-1 -right-1 w-5 h-5 bg-glass-bg text-text-primary rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100 z-10 hover:bg-red-500 hover:text-white"
-              aria-label={`Delete ${project.name}`}
-            >
-              &times;
-            </button>
-          </div>
-        ))}
+        {projects.map(project => {
+          const isSelected = selectedProjectId === project.id;
+          const isEditing = editingProjectId === project.id;
+
+          const buttonClasses = `project-selector-button h-10 px-4 py-2 text-sm font-sans rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-background focus:ring-highlight ${
+              isSelected
+                ? isEditing
+                  ? 'bg-accent-text text-accent'
+                  : 'bg-accent text-accent-text'
+                : 'text-text-secondary hover:bg-subtle-hover hover:text-text-primary'
+            }`;
+
+          return (
+            <div key={project.id} className="relative group">
+              <button
+                onClick={() => onSelectProject(project.id)}
+                className={buttonClasses}
+              >
+                <EditableText 
+                  value={project.name}
+                  onChange={(newName) => onProjectNameChange(project.id, newName)}
+                  tag="span"
+                  className="outline-none"
+                  onEditingChange={(isNowEditing) => {
+                    if (isSelected) {
+                        setEditingProjectId(isNowEditing ? project.id : null);
+                    }
+                  }}
+                />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeleteProject(project.id);
+                }}
+                className="presentation-hide absolute -top-1 -right-1 w-5 h-5 bg-glass-bg text-text-primary rounded-full flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100 z-10 hover:bg-red-500 hover:text-white"
+                aria-label={`Delete ${project.name}`}
+              >
+                &times;
+              </button>
+            </div>
+          )
+        })}
         <div className="relative">
           <button 
             ref={addButtonRef}
